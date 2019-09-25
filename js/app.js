@@ -1,53 +1,66 @@
-/*
- * Create a list that holds all of your cards
- */
+// I shuffled the icons here
 let icons = ['<i class="fa fa-bomb"></i>', '<i class="fa fa-bomb"></i>', ' <i class="fa fa-bolt"></i>', '<i class="fa fa-bolt"></i>',
     '<i class="fa fa-diamond"></i>', ' <i class="fa fa-diamond"></i>', '<i class="fa fa-paper-plane-o"></i>', ' <i class="fa fa-paper-plane-o"></i>',
     '<i class="fa fa-leaf"></i>', '<i class="fa fa-leaf"></i>', '<i class="fa fa-bicycle"></i>', '<i class="fa fa-bicycle"></i>', '<i class="fa fa-cube"></i>', '<i class="fa fa-cube"></i>', '<i class="fa fa-anchor"></i>', '<i class="fa fa-anchor"></i>'
 ];
-shuffle(icons)
-stars = document.querySelector('.stars');
-let moves = document.querySelector('.moves')
-moves.innerText = 0
-let shapes = []
-let solve = [];
-let obj = document.querySelectorAll('.card')
+shuffle(icons);
+
+//declaring varibels 
+let moves = document.querySelector('.moves');
+moves.innerText = 0;
+// this array will contain the card *not the icons*
+let shapes = [];
+let obj = document.querySelectorAll('.card');
 shapes.push(...obj);
+// this array to check if the cards or icons match
+let solve = [];
+//other varibels
 let counter = 0;
 let cardsSolved = 0;
-let body = document.getElementsByTagName('body')
-let modal = document.querySelector('#exampleModal')
+const modal = document.querySelector('#exampleModal')
+const btn = document.querySelector('.restart');
+const playAgainbtn = document.querySelector('.btn-primary');
+const timer = document.querySelector('.timer')
+let fElm = -1;
+let sElm = -2;
+let start = Date.now();
+let end = 0;
+let mins = 0;
+let init;
+//the main loop that does everthing
+//opens the cards
+//checking if the cards match
 
 
-
-console.log(solve.length);
-for (let i = 0; i < 16; i++) {
+for (let i = 0; i < shapes.length; i++) {
     shapes[i].addEventListener('click', function (e) {
         let xx = shapes[i];
-        // let target = e.target.childNodes[2];
-        // let xx = e.target;
-        // console.log(target);
-        console.log(solve.length);
+
         if (solve.length === 0) {
-            console.log(i);
-            console.log('harlolo this shit works');
+            fElm = i;
         }
+        if (solve.length === 1) {
+            sElm = i;
+        }
+        //pushing the cards to the solve array and check if its correct 
         if (solve.length < 2) {
             shapes[i].setAttribute('class', 'card open show');
-            solve.push(xx);
 
-            moves.innerText++;
+            if (fElm != sElm) {
+                solve.push(xx);
+                moves.innerText++;
+                stars();
+            }
+
             if (solve.length === 2) {
                 let p1 = solve[0].firstElementChild.classList[1];
                 let p2 = solve[1].firstElementChild.classList[1];
-
-                if (solve[0].firstElementChild.classList[1] === solve[1].firstElementChild.classList[1]) {
-                    solve[0].setAttribute('class', 'card match')
-                    solve[1].setAttribute('class', 'card match')
-                    console.log(shapes);
-                    solve = []
+                if (p1 === p2) {
+                    solve[0].setAttribute('class', 'card match');
+                    solve[1].setAttribute('class', 'card match');
+                    solve = [];
+                    //a checker for when the game ends
                     cardsSolved++;
-                    console.log(cardsSolved);
                 }
                 if (p1 !== p2) {
                     solve[0].setAttribute('class', 'card unmatch')
@@ -55,73 +68,98 @@ for (let i = 0; i < 16; i++) {
                     setTimeout(function () {
                         solve[0].classList.remove("unmatch");
                         solve[1].classList.remove("unmatch");
-                        solve = []
-                    }, 500);
+                        solve = [];
+                    }, 400);
                 }
+
             }
+
         }
         if (cardsSolved === 8) {
+            end = Date.now();
+            time = Math.floor((end - start) * 0.001);
+
             setTimeout(function () {
+                timeE = document.querySelector('.timeE');
+                timeE.innerHTML = time;
                 modal.setAttribute('style', 'display: block;')
                 modal.setAttribute('class', 'modal fade show')
-            }, 800);
+            }, 500);
         }
 
     });
 
 
 }
-// let fa = document.querySelectorAll('.fa')
-// // let icons = []
-// icons.push(...fa);
-// icons.splice(0, 4);
-// console.log(icons);
+//this is weird i know, but i shuffled the icons and then i merged them with the cards
 function merge() {
     for (let i = 0; i < shapes.length; i++) {
         shapes[i].innerHTML = icons[i];
     }
 }
 merge();
-// // shuffle(icons);
-// shuffle(shapes);
-// console.log(icons);
-
-btn = document.querySelector('.restart');
-console.log(btn);
-btn.addEventListener('click', function () {
+// the restarting feature
+function restart() {
     moves.innerText = 0;
     cardsSolved = 0;
     shuffle(icons);
     merge();
+    stars();
+    stop(init);
+    T();
     for (let i = 0; shapes.length > i; i++) {
         shapes[i].setAttribute('class', 'card');
         solve = [];
     }
+}
+btn.addEventListener('click', restart);
+
+playAgainbtn.addEventListener('click', function () {
+    modal.setAttribute('class', 'modal fade');
+    modal.setAttribute('style', 'display: none;')
+    restart();
 });
 
-playAgainbtn = document.querySelector('.btn-primary');
-console.log(playAgainbtn);
-playAgainbtn.addEventListener('click', function () {
-    moves.innerText = 0;
-    cardsSolved = 0;
-    shuffle(icons);
-    merge();
-    modal.setAttribute('class', 'modal fade');
-    // modal.removeAttribute('style')
-    modal.setAttribute('style', 'display: none;')
-
-    for (let i = 0; shapes.length > i; i++) {
-        shapes[i].setAttribute('class', 'card');
-        solve = [];
+// controling stars
+function stars() {
+    let stars = document.querySelector('.stars')
+    if (moves.innerText == 0) {
+        stars.innerHTML = '<li><i class="fa fa-star"></i></li><li><i class="fa fa-star"></i></li><li><i class="fa fa-star"></i></li> '
     }
-})
+    if (moves.innerText == 20) {
+        stars.innerHTML = '<li><i class="fa fa-star"></i></li><li><i class="fa fa-star"></i></li><i class="far fa-star"></i>'
+    }
+    if (moves.innerText == 25) {
+        stars.innerHTML = '<li><i class="fa fa-star"></i></li><i class="far fa-star"></i><i class="far fa-star"></i> '
+    }
+    if (moves.innerText == 35) {
+        stars.innerHTML = '<li><i class="far fa-star"></i></li><i class="far fa-star"></i><i class="far fa-star"></i> '
+    }
+}
+stars();
+
+//timer 
+function T() {
+    let start = Date.now();
+    init = setInterval(function () {
+        end = Date.now();
+        time = Math.floor((end - start) * 0.001);
+        if (time % 60 == 0) {
+            start = Date.now();
+            time = 0;
+            mins++;
+        }
 
 
+        timer.innerHTML = mins + ':' + time;
+    }, 1000);
+}
+T();
 
+function stop(t) {
+    clearInterval(t);
+}
 
-
-
-// Shuffle function from http://stackoverflow.com/a/2450976
 function shuffle(array) {
     var currentIndex = array.length,
         temporaryValue, randomIndex;
@@ -135,14 +173,3 @@ function shuffle(array) {
 
     return array;
 }
-
-
-// /*
-//  * set up the event listener for a card. If a card is clicked:
-//  *  - display the card's symbol (put this functionality in another function that you call from this one)
-//  *  - add the card to a *list* of "open" cards (put this functionality in another function that you call from this one)
-//  *  - if the list already has another card, check to see if the two cards match
-//  *    + if the cards do match, lock the cards in the open position (put this functionality in another function that you call from this one)
-//  *    + if the cards do not match, remove the cards from the list and hide the card's symbol (put this functionality in another function that you call from this one)
-//  *    + increment the move counter and display it on the page (put this functionality in another function that you call from this one)
-//  *    + if all cards have matched, display a message with the final score (put this functionality in another function that you call from this one)
